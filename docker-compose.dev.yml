@@ -1,0 +1,28 @@
+# ===========================================================
+# Panel del cliente — Entorno de Desarrollo Local
+#
+# El navegador habla con la pasarela en http://localhost:8000; este
+# contenedor solo sirve ficheros estáticos, así que no entra en tfm-network.
+#
+#   docker compose -f docker-compose.dev.yml up --build -d
+#   → http://localhost:5173
+#
+# Lo levanta scripts/dev-up.sh del repositorio docs.
+# ===========================================================
+
+services:
+  frontend:
+    build:
+      context: .
+      args:
+        VITE_GATEWAY_URL: ${VITE_GATEWAY_URL:-http://localhost:8000}
+    container_name: frontend-panel
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
