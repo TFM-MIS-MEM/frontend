@@ -1,0 +1,54 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    name: Lint, Audit, Test & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.24.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm run lint
+
+      # `--prod`: se audita lo que llega al bundle, no las herramientas de
+      # build y prueba (el mismo criterio que auth-microservice). El reintento
+      # es por el registro de avisos de npm, que a ratos devuelve 503.
+      - name: Security audit
+        run: |
+          code=0
+          for intento in 1 2 3; do
+            pnpm audit --prod && exit 0 || code=$?
+            [ "$intento" -lt 3 ] && sleep 10
+          done
+          exit "$code"
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+
+      - name: Docker image builds
+        run: docker build -t tfm-frontend:ci .

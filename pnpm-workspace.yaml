@@ -1,0 +1,4 @@
+# pnpm 11 exige decidir qué dependencias ejecutan scripts de instalación.
+# esbuild descarga su binario nativo en el postinstall: sin él, Vite no arranca.
+allowBuilds:
+  esbuild: true
