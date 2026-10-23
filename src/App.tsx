@@ -7,6 +7,7 @@ import { Credentials } from '@/pages/Credentials'
 import { Galleries } from '@/pages/Galleries'
 import { GalleryDetail } from '@/pages/GalleryDetail'
 import { Login } from '@/pages/Login'
+import { Plans } from '@/pages/Plans'
 import { Register } from '@/pages/Register'
 import { Verify } from '@/pages/Verify'
 
@@ -30,6 +31,7 @@ export function AppRoutes() {
         <Route path="/galleries/:galleryId" element={<GalleryDetail />} />
         <Route path="/verify" element={<Verify />} />
         <Route path="/credentials" element={<Credentials />} />
+        <Route path="/plans" element={<Plans />} />
       </Route>
       <Route path="*" element={<Navigate to="/galleries" replace />} />
     </Routes>
