@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Check, ExternalLink, Minus } from 'lucide-react'
+import { Check, CloudOff, ExternalLink, Minus } from 'lucide-react'
 import type { AddOn, Pricing, UsageLimit } from 'pricing4ts'
 
-import { loadPinnedPricing } from '@/api/sphere'
+import { LOCAL_COPY, loadPinnedPricing, type LoadedPricing } from '@/api/sphere'
 import { ErrorAlert } from '@/components/ErrorAlert'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -13,7 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 // ello está escrito aquí. Las etiquetas de cada fila son las descripciones de
 // la propia tarifa (su primera frase; la completa, al pasar el ratón).
 export function Plans() {
-  const [data, setData] = useState<{ pricing: Pricing; permanentUrl: string } | null>(null)
+  const [data, setData] = useState<LoadedPricing | null>(null)
   const [error, setError] = useState<unknown>(null)
 
   useEffect(() => {
@@ -29,13 +30,22 @@ export function Plans() {
   if (error) return <ErrorAlert error={error} />
   if (!data) return <p className="text-sm text-muted-foreground">Cargando la tarifa…</p>
 
-  const { pricing, permanentUrl } = data
+  const { pricing, permanentUrl, local } = data
   const plans = Object.values(pricing.plans ?? {})
   const money = new Intl.NumberFormat('es-ES', { style: 'currency', currency: pricing.currency })
   const number = new Intl.NumberFormat('es-ES')
 
   return (
     <div className="grid gap-6">
+      {local && (
+        <Alert>
+          <CloudOff />
+          <AlertTitle>Copia local de la versión {LOCAL_COPY.version}; SPHERE no disponible</AlertTitle>
+          <AlertDescription>
+            La tarifa se muestra desde la copia que lleva el panel, que es la misma versión que aplica el servicio.
+          </AlertDescription>
+        </Alert>
+      )}
       <Card>
         <CardHeader>
           <CardTitle>Planes</CardTitle>

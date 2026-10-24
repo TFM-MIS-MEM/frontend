@@ -1,7 +1,13 @@
+import { createHash } from 'node:crypto'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+
 import { render, screen, within } from '@testing-library/react'
+import yaml from 'js-yaml'
 import { MemoryRouter } from 'react-router'
 import { describe, expect, it, vi } from 'vitest'
 
+import { LOCAL_COPY } from '@/api/sphere'
 import { Plans } from '@/pages/Plans'
 
 // Una tarifa mínima en Pricing2Yaml 3.1: lo que se comprueba es que la vista
@@ -144,5 +150,74 @@ describe('vista de planes', () => {
     renderPlans()
 
     expect(await screen.findByText(/SPHERE respondió 503/)).toBeInTheDocument()
+  })
+})
+
+
+// La huella funcional que SPHERE publica para la versión 1.1 (contentHash del
+// manifiesto; pricing-microservice/pricing/sphere.env): SHA-256 del YAML
+// canonizado, claves ordenadas, sin `saasName`. El algoritmo es el de SPHERE y
+// SPACE (`functionalHash`).
+const PINNED_HASH = '18880387519a85a9b3ec86827a5b4a4222e8e1fefc9d5684c9da325c72923817'
+
+function functionalHash(text: string): string {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { saasName, ...functional } = yaml.load(text) as Record<string, unknown>
+  const canonical = (v: unknown): unknown =>
+    Array.isArray(v)
+      ? v.map(canonical)
+      : v && typeof v === 'object' && !(v instanceof Date)
+        ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, canonical((v as Record<string, unknown>)[k])]))
+        : v
+  return createHash('sha256').update(JSON.stringify(canonical(functional))).digest('hex')
+}
+
+describe('copia local de la tarifa (sin red)', () => {
+  it('es la versión 1.1 fijada: su huella funcional es la que publica SPHERE', () => {
+    const local = readFileSync(resolve(__dirname, '../src/assets/fr-commercial-pricing-1.1.yaml'), 'utf8')
+
+    expect(functionalHash(local)).toBe(PINNED_HASH)
+    expect((yaml.load(local) as { version: string }).version).toBe(LOCAL_COPY.version)
+  })
+
+  it('con SPHERE caído, pinta la copia local y lo dice', async () => {
+    vi.stubEnv('VITE_SPHERE_PRICING_ID', 'familia')
+    vi.stubEnv('VITE_SPHERE_PRICING_VERSION_ID', LOCAL_COPY.versionId)
+    vi.stubGlobal('fetch', vi.fn(async () => Promise.reject(new TypeError('Failed to fetch'))))
+
+    renderPlans()
+
+    expect(await screen.findByText('Copia local de la versión 1.1; SPHERE no disponible')).toBeInTheDocument()
+    expect(screen.getByText(/Tarifa FRSaaS, versión 1\.1/)).toBeInTheDocument()
+    expect(screen.getByText('12,38 €')).toBeInTheDocument()
+  })
+
+  it('con SPHERE colgado, a los 3 s pinta la copia local', async () => {
+    vi.stubEnv('VITE_SPHERE_PRICING_ID', 'familia')
+    vi.stubEnv('VITE_SPHERE_PRICING_VERSION_ID', LOCAL_COPY.versionId)
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        (_url: string, init: RequestInit) =>
+          new Promise((_resolve, reject) => init.signal?.addEventListener('abort', () => reject(init.signal?.reason))),
+      ),
+    )
+    const started = Date.now()
+
+    renderPlans()
+
+    expect(await screen.findByText(/SPHERE no disponible/, {}, { timeout: 6000 })).toBeInTheDocument()
+    expect(Date.now() - started).toBeGreaterThanOrEqual(2900)
+  }, 10000)
+
+  it('si la versión fijada no es la de la copia, no la usa', async () => {
+    vi.stubEnv('VITE_SPHERE_PRICING_ID', 'familia')
+    vi.stubEnv('VITE_SPHERE_PRICING_VERSION_ID', 'otra-version')
+    vi.stubGlobal('fetch', vi.fn(async () => Promise.reject(new TypeError('Failed to fetch'))))
+
+    renderPlans()
+
+    expect(await screen.findByText(/La copia local es de la versión 1\.1, no de la fijada/)).toBeInTheDocument()
+    expect(screen.queryByText(/Tarifa FRSaaS/)).not.toBeInTheDocument()
   })
 })
