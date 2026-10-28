@@ -1,17 +1,17 @@
 import type { Pricing } from 'pricing4ts'
 
-import localYaml from '@/assets/fr-commercial-pricing-1.1.yaml?raw'
+import localYaml from '@/assets/fr-commercial-pricing-1.2.yaml?raw'
 import { SPHERE_API_URL, spherePricing } from '@/core/config'
 
 export class SphereError extends Error {}
 
 // Copia local de la tarifa, en el bundle, para que la vista de planes no dependa
-// de la red en la demo. Es la versión 1.1, la fijada hoy: se usa SOLO si la
+// de la red en la demo. Es la versión 1.2, la fijada hoy: se usa SOLO si la
 // versión fijada del build es esta y SPHERE falla o tarda más de
 // SPHERE_TIMEOUT_MS. Con otra versión fijada no se usa: enseñaría una tarifa
 // distinta de la que aplica SPACE. tests/plans.test.tsx comprueba que su huella
 // funcional es la de la versión fijada.
-export const LOCAL_COPY = { version: '1.1', versionId: '6ada81594b2b5b01c587d1f0' }
+export const LOCAL_COPY = { version: '1.2', versionId: '6ae21c99412c826b6fbde67f' }
 export const SPHERE_TIMEOUT_MS = 3000
 
 export interface LoadedPricing {
