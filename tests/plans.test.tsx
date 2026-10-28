@@ -154,11 +154,11 @@ describe('vista de planes', () => {
 })
 
 
-// La huella funcional que SPHERE publica para la versión 1.1 (contentHash del
+// La huella funcional que SPHERE publica para la versión 1.2 (contentHash del
 // manifiesto; pricing-microservice/pricing/sphere.env): SHA-256 del YAML
 // canonizado, claves ordenadas, sin `saasName`. El algoritmo es el de SPHERE y
 // SPACE (`functionalHash`).
-const PINNED_HASH = '18880387519a85a9b3ec86827a5b4a4222e8e1fefc9d5684c9da325c72923817'
+const PINNED_HASH = '3d382533267bd226fbb81323be48b7ed7529b3161c09f65984163364b7f9f80e'
 
 function functionalHash(text: string): string {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -173,8 +173,8 @@ function functionalHash(text: string): string {
 }
 
 describe('copia local de la tarifa (sin red)', () => {
-  it('es la versión 1.1 fijada: su huella funcional es la que publica SPHERE', () => {
-    const local = readFileSync(resolve(__dirname, '../src/assets/fr-commercial-pricing-1.1.yaml'), 'utf8')
+  it('es la versión 1.2 fijada: su huella funcional es la que publica SPHERE', () => {
+    const local = readFileSync(resolve(__dirname, '../src/assets/fr-commercial-pricing-1.2.yaml'), 'utf8')
 
     expect(functionalHash(local)).toBe(PINNED_HASH)
     expect((yaml.load(local) as { version: string }).version).toBe(LOCAL_COPY.version)
@@ -187,9 +187,9 @@ describe('copia local de la tarifa (sin red)', () => {
 
     renderPlans()
 
-    expect(await screen.findByText('Copia local de la versión 1.1; SPHERE no disponible')).toBeInTheDocument()
-    expect(screen.getByText(/Tarifa FRSaaS, versión 1\.1/)).toBeInTheDocument()
-    expect(screen.getByText('12,38 €')).toBeInTheDocument()
+    expect(await screen.findByText('Copia local de la versión 1.2; SPHERE no disponible')).toBeInTheDocument()
+    expect(screen.getByText(/Tarifa FRSaaS, versión 1\.2/)).toBeInTheDocument()
+    expect(screen.getByText('12,65 €')).toBeInTheDocument()
   })
 
   it('con SPHERE colgado, a los 3 s pinta la copia local', async () => {
@@ -217,7 +217,7 @@ describe('copia local de la tarifa (sin red)', () => {
 
     renderPlans()
 
-    expect(await screen.findByText(/La copia local es de la versión 1\.1, no de la fijada/)).toBeInTheDocument()
+    expect(await screen.findByText(/La copia local es de la versión 1\.2, no de la fijada/)).toBeInTheDocument()
     expect(screen.queryByText(/Tarifa FRSaaS/)).not.toBeInTheDocument()
   })
 })
