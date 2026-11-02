@@ -1,8 +1,9 @@
 # frontend — panel del cliente
 
 Panel del SaaS de reconocimiento facial **por el canal web**. React + Vite +
-Tailwind + shadcn/ui. Solo habla con la pasarela (`VITE_GATEWAY_URL`, por
-omisión `http://localhost:8000`) y solo con `Authorization: Bearer <jwt>`.
+Tailwind + shadcn/ui. Habla con la pasarela (`VITE_GATEWAY_URL`, por omisión
+`http://localhost:8000`), solo con `Authorization: Bearer <jwt>`, y, para la
+vista de planes, con la API pública de SPHERE.
 
 ## Pantallas
 
@@ -14,6 +15,7 @@ omisión `http://localhost:8000`) y solo con `Authorization: Bearer <jwt>`.
 | Galerías | `/galleries` | `listGalleries` y `createGallery` (nombre, descripción, modelo opcional; id copiable) |
 | Detalle de galería | `/galleries/:id` | `getGallery` y `listIdentities` |
 | Verificación | `/verify` | `verifyPair` con dos imágenes → misma persona o no, confianza, umbral y modelo |
+| Planes | `/plans` | ninguna de la pasarela: pinta la tarifa publicada en SPHERE, en la versión fijada en `pricing-microservice/pricing/sphere.env` |
 
 Contratos: `auth-microservice/openapi/auth.yaml` y
 `fr-commercial-microservice/openapi/fr-commercial.yaml`. Los errores se
@@ -30,9 +32,9 @@ en el CORS a propósito. Lo fija `tests/register.test.tsx`.
 **El JWT va en `sessionStorage`**: sobrevive a recargar y muere con la pestaña.
 Su vigencia la decide `auth` (`JWT_EXPIRES_IN`).
 
-**Sin evaluación de plan.** El umbral configurable, los límites y la
-congelación son F10 (TFM-MIS-MEM/docs#42); el panel muestra lo que responda la
-API.
+**Sin evaluación de plan.** El plan lo evalúa `fr-commercial` con SPACE (F10,
+TFM-MIS-MEM/docs#42): umbral configurable, límites y congelación. El panel no
+lo replica; muestra lo que responda la API.
 
 ## Ejecutar
 
@@ -43,7 +45,13 @@ pnpm test           # Vitest
 pnpm lint && pnpm build
 ```
 
-En contenedor, como lo levanta `scripts/dev-up.sh` del repositorio `docs`:
+Sin `VITE_SPHERE_PRICING_ID` y `VITE_SPHERE_PRICING_VERSION_ID` (los valores de
+`pricing-microservice/pricing/sphere.env`), todo funciona salvo `/plans`, que
+muestra un error.
+
+En contenedor, como lo levanta `scripts/dev-up.sh` del repositorio `docs`. El
+compose exige `SPHERE_PRICING_ID` y `SPHERE_PRICING_VERSION_ID` en el entorno, y
+no arranca sin ellas; `dev-up.sh` las exporta de `sphere.env`:
 
 ```sh
 docker compose -f docker-compose.dev.yml up --build -d   # → http://localhost:5173
