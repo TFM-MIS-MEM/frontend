@@ -2,15 +2,3 @@
 # esbuild descarga su binario nativo en el postinstall: sin él, Vite no arranca.
 allowBuilds:
   esbuild: true
-
-# `uuid` lo arrastra pricing4ts, que declara `uuid: ^10.0.0` y NO lo importa:
-# comprobado en la 0.12.1, ningún fichero de `dist/` hace `require('uuid')`, y
-# el bundle del panel no lo contiene. Es una dependencia fantasma, pero de
-# producción, y `pnpm audit --prod` avisa de GHSA-w5hq-g745-h8pq (< 11.1.1).
-#
-# Se fuerza la versión parcheada en lugar de silenciar el aviso, como con
-# `axios` en auth: si algún día se cargara, sería la sana. Sin techo, también
-# como allí: no se carga, así que un major no rompe nada que se ejecute. Lo
-# duradero es que Pricing4TS deje de declararlo (aviso en los issues de docs).
-overrides:
-  uuid: '>=11.1.1'
