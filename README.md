@@ -2,8 +2,7 @@
 
 Panel del SaaS de reconocimiento facial **por el canal web**. React + Vite +
 Tailwind + shadcn/ui. Habla con la pasarela (`VITE_GATEWAY_URL`, por omisión
-`http://localhost:8000`), solo con `Authorization: Bearer <jwt>`, y, para la
-vista de planes, con la API pública de SPHERE.
+`http://localhost:8000`), solo con `Authorization: Bearer <jwt>`.
 
 ## Pantallas
 
@@ -15,7 +14,7 @@ vista de planes, con la API pública de SPHERE.
 | Galerías | `/galleries` | `listGalleries` y `createGallery` (nombre, descripción, modelo opcional; id copiable) |
 | Detalle de galería | `/galleries/:id` | `getGallery` y `listIdentities` |
 | Verificación | `/verify` | `verifyPair` con dos imágenes → misma persona o no, confianza, umbral y modelo |
-| Planes | `/plans` | ninguna de la pasarela: pinta la tarifa publicada en SPHERE, en la versión fijada en `pricing-microservice/pricing/sphere.env` |
+| Pricing | enlace externo | ninguna: abre en otra pestaña la tarifa en SPHERE, `/p/{pricingId}?version={versionId}`, en la versión fijada en `pricing-microservice/pricing/sphere.env` |
 
 Contratos: `auth-microservice/openapi/auth.yaml` y
 `fr-commercial-microservice/openapi/fr-commercial.yaml`. Los errores se
@@ -46,8 +45,8 @@ pnpm lint && pnpm build
 ```
 
 Sin `VITE_SPHERE_PRICING_ID` y `VITE_SPHERE_PRICING_VERSION_ID` (los valores de
-`pricing-microservice/pricing/sphere.env`), todo funciona salvo `/plans`, que
-muestra un error.
+`pricing-microservice/pricing/sphere.env`), todo funciona salvo el enlace a
+Pricing, que no aparece: sin la versión, SPHERE abriría la última.
 
 En contenedor, como lo levanta `scripts/dev-up.sh` del repositorio `docs`. El
 compose exige `SPHERE_PRICING_ID` y `SPHERE_PRICING_VERSION_ID` en el entorno, y

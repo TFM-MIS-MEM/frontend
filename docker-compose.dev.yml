@@ -16,7 +16,7 @@ services:
       context: .
       args:
         VITE_GATEWAY_URL: ${VITE_GATEWAY_URL:-http://localhost:8000}
-        # La versión fijada de la tarifa (vista de planes). La única fuente es
+        # La versión fijada de la tarifa (enlace a Pricing en SPHERE). La única fuente es
         # pricing-microservice/pricing/sphere.env, que scripts/dev-up.sh exporta
         # antes de levantar este compose.
         VITE_SPHERE_PRICING_ID: ${SPHERE_PRICING_ID:?falta; levántalo con scripts/dev-up.sh, que la lee de pricing/sphere.env}

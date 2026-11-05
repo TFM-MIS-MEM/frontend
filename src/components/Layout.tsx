@@ -1,19 +1,20 @@
 import { NavLink, Outlet } from 'react-router'
-import { LogOut, ScanFace } from 'lucide-react'
+import { ExternalLink, LogOut, ScanFace } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/core/auth'
+import { spherePricingUrl } from '@/core/config'
 import { cn } from '@/lib/utils'
 
 const NAV = [
   { to: '/galleries', label: 'Galerías' },
   { to: '/verify', label: 'Verificación' },
   { to: '/credentials', label: 'Credenciales' },
-  { to: '/plans', label: 'Planes' },
 ]
 
 export function Layout() {
   const { account, logout } = useAuth()
+  const pricingUrl = spherePricingUrl()
   return (
     <div className="min-h-screen">
       <header className="border-b">
@@ -33,6 +34,16 @@ export function Layout() {
                 {n.label}
               </NavLink>
             ))}
+            {pricingUrl && (
+              <a
+                href={pricingUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 rounded-md px-3 py-1.5 text-sm hover:bg-accent"
+              >
+                Pricing <ExternalLink className="size-3.5" />
+              </a>
+            )}
           </nav>
           <div className="ml-auto flex items-center gap-3 text-sm">
             <span className="text-muted-foreground">{account?.email}</span>

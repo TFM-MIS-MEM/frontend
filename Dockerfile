@@ -10,9 +10,9 @@ COPY . .
 # no es un secreto.
 ARG VITE_GATEWAY_URL=http://localhost:8000
 ENV VITE_GATEWAY_URL=$VITE_GATEWAY_URL
-# La versión de la tarifa publicada en SPHERE que pinta la vista de planes: la
+# La versión de la tarifa publicada en SPHERE que abre el enlace a Pricing: la
 # FIJADA en pricing-microservice/pricing/sphere.env, la misma que carga SPACE.
-# Sin valor por omisión: sin ella, la vista lo dice en lugar de pedir otra.
+# Sin valor por omisión: sin ella, el enlace no aparece en lugar de abrir otra.
 ARG VITE_SPHERE_PRICING_ID
 ARG VITE_SPHERE_PRICING_VERSION_ID
 ENV VITE_SPHERE_PRICING_ID=$VITE_SPHERE_PRICING_ID
